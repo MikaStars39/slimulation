@@ -2,9 +2,7 @@ import json
 import asyncio
 import sglang as sgl
 from tqdm.asyncio import tqdm
-import sys
-
-sys.setrecursionlimit(100000)
+# import aiofiles
 
 async def run_offline_async_inference(
     input_file: str, 
@@ -12,104 +10,77 @@ async def run_offline_async_inference(
     model_path: str, 
     dp_size: int,
     tp_size: int,
-    batch_size: int,
+    max_concurrency: int, 
     mem_fraction_static: float,
     sampling_params: dict,
+    batch_size: int,
 ):
-    """
-    Perform offline inference with Data Parallelism and streaming file I/O.
-    
-    Args:
-        input_file: Path to the input .jsonl file.
-        output_file: Path to the output .jsonl file.
-        model_path: Path to the model weights.
-        batch_size: Number of prompts to send to the engine at once.
-    """
-    
-    # 1. Initialize SGLang Engine with Data Parallelism
-    # dp_size=8 will replicate the model across 8 GPUs for higher throughput.
-    # tp_size=1 assumes the model fits on a single GPU. 
-    # If the model is huge (e.g., 70B), use tp_size=2, dp_size=4 for 8 GPUs total.
+    # 1. Initialize Engine
     llm = sgl.Engine(
         model_path=model_path,
         dp_size=dp_size, 
         tp_size=tp_size,
-        mem_fraction_static=mem_fraction_static, # Reserved memory for KV cache
-        # disable_cuda_graph=True, # Disable CUDA Graph to avoid RecursionError
+        mem_fraction_static=mem_fraction_static,
+        log_level="error"
     )
 
-    # 2. Stream Processing: Read and write line by line to handle large files
-    # Count total lines for progress bar
-    with open(input_file, "r", encoding="utf-8") as f:
-        total_lines = sum(1 for _ in f)
+    # 2. Worker Logic (Consumer)
+    # 使用 Queue 解耦，限制并发数，防止内存爆炸
+    queue = asyncio.Queue(maxsize=max_concurrency * 2)
+    
+    # 计算总行数用于进度条（同步读取即可，速度很快）
+    total_lines = sum(1 for _ in open(input_file, 'r', encoding='utf-8') if _.strip())
+    pbar = tqdm(total=total_lines, desc=f"Inference (DP={dp_size})")
 
-    with open(input_file, "r", encoding="utf-8") as f_in, open(output_file, "w", encoding="utf-8") as f_out:
-        
-        batch_data = []
-        pbar = tqdm(total=total_lines, desc=f"Inference (DP={dp_size})")
-        
-        for line in f_in:
-            if not line.strip():
-                pbar.update(1)
-                continue
+    async def worker(f_out):
+        while True:
+            # 从队列获取数据
+            item = await queue.get()
+            if item is None: 
+                # 结束信号
+                queue.task_done()
+                break
             
-            batch_data.append(json.loads(line))
-            
-            # 3. When batch is full, trigger asynchronous inference
-            if len(batch_data) >= batch_size:
-                prompts = [item["prompt"] for item in batch_data]
-                
-                # SGLang distributes these prompts across all DP workers automatically
-                outputs = await llm.async_generate(prompts, sampling_params)
-                
-                # 4. Write results immediately to disk
-                for item, output in zip(batch_data, outputs):
-                    item["response"] = output["text"]
-                    f_out.write(json.dumps(item, ensure_ascii=False) + "\n")
-                
-                f_out.flush() 
-                pbar.update(len(batch_data))
-                batch_data = [] # Clear the batch
-
-        # 5. Handle the remaining items in the last batch
-        if batch_data:
-            prompts = [item["prompt"] for item in batch_data]
-            outputs = await llm.async_generate(prompts, sampling_params)
-            for item, output in zip(batch_data, outputs):
+            try:
+                # 异步推理
+                output = await llm.async_generate(item["prompt"], sampling_params)
                 item["response"] = output["text"]
-                f_out.write(json.dumps(item, ensure_ascii=False) + "\n")
-            pbar.update(len(batch_data))
+                
+                # 同步写入 (虽然是同步，但去掉flush后通常非常快，不会成为瓶颈)
+                line = json.dumps(item, ensure_ascii=False) + "\n"
+                f_out.write(line)
+                
+            except Exception as e:
+                print(f"Error processing item: {e}")
+            finally:
+                pbar.update(1)
+                queue.task_done()
 
-        pbar.close()
+    # 3. Producer Logic (File Reader)
+    async def producer():
+        # 同步读取文件，但逐行放入异步队列
+        with open(input_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip():
+                    await queue.put(json.loads(line))
+        
+        # 发送结束信号给所有 worker
+        for _ in range(max_concurrency):
+            await queue.put(None)
 
-    # 6. Clean up resources
+    # 4. Run Pipeline
+    # 使用标准的 open
+    with open(output_file, "w", encoding="utf-8") as f_out:
+        # 启动消费者 (Workers)
+        workers = [asyncio.create_task(worker(f_out)) for _ in range(max_concurrency)]
+        
+        # 启动生产者
+        await producer()
+        
+        # 等待所有任务完成
+        await queue.join()
+        await asyncio.gather(*workers)
+
+    pbar.close()
     llm.shutdown()
     print(f"Done! Results saved to {output_file}")
-
-if __name__ == "__main__":
-    model_path = "/mnt/llm-train/users/explore-train/qingyu/PeRL/outputs/20260110_173129_gspo_qwen30ba3b/iter_0000223_hf"
-    input_file = "examples/debug.jsonl"
-    output_file = "examples/debug_output.jsonl"
-    batch_size = 256
-    dp_size = 8
-    tp_size = 1
-    mem_fraction_static = 0.8
-    sampling_params = {
-        "temperature": 0.7,
-        "top_p": 0.95,
-        "max_new_tokens": 32000,
-    }
-
-    # Run async main function with asyncio.run
-    asyncio.run(
-        run_offline_async_inference(
-            input_file=input_file, 
-            output_file=output_file, 
-            model_path=model_path, 
-            dp_size=dp_size,
-            tp_size=tp_size,
-            batch_size=batch_size,
-            mem_fraction_static=mem_fraction_static,
-            sampling_params=sampling_params,
-        )
-    )
