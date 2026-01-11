@@ -341,7 +341,9 @@ def init_vllm(
         model_path = merge_model_if_needed(args, Path(args.result_dir), logger)
 
     with StageContext(logger, "B", "Start vLLM Backends"):
-        processes, ports = start_vllm_processes(model_path, args, vllm_args, logger)
+        new_processes, new_ports = start_vllm_processes(model_path, args, vllm_args, logger)
+        processes.extend(new_processes)
+        ports.extend(new_ports)
         atexit.register(stop_vllm_processes, processes, logger)
 
         def handle_signal(signum, frame):  # noqa: ANN001
@@ -362,7 +364,7 @@ def init_vllm(
     # Initialize global semaphores
     dp_size = max(1, args.dp_size)
     max_concurrent_per_dp = max(1, args.max_num_request // dp_size)
-    semaphores = {port: asyncio.Semaphore(max_concurrent_per_dp) for port in ports}
+    semaphores.update({port: asyncio.Semaphore(max_concurrent_per_dp) for port in ports})
     logger.info(
         "Global concurrency control initialized: Max concurrency per DP process=%d",
         max_concurrent_per_dp,
@@ -416,7 +418,7 @@ async def main() -> None:
     need_pass2 = args.mode in ["all", "llm-eval"]
 
     if need_pass1 or need_pass2:
-        init_vllm(args, logger, processes, ports, semaphores)
+        init_vllm(args, logger, processes, ports, semaphores, vllm_args)
 
     # ------------------- 2. preparing and submitting datasets -------------------- 
     datasets_to_run = [item.strip() for item in args.dataset.split(",") if item.strip()]

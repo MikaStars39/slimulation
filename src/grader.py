@@ -548,7 +548,15 @@ def score_response(
         ground_truth = sample["label"]
     else:
         raise ValueError(f"Unsupported sample format: {sample}")
-    return grade_answer_perl(response, str(ground_truth))
+
+    # If response is already extracted (from judge), directly compare
+    # Otherwise, use the original grading logic
+    if response and not any(pattern in response for pattern in ["\\boxed", "Answer:"]):
+        # Response appears to be already extracted, compare directly
+        return grade_extracted_answer_perl(response, str(ground_truth)), 1.0
+    else:
+        # Use original grading logic for raw responses
+        return grade_answer_perl(response, str(ground_truth))
 
 
 def main():
