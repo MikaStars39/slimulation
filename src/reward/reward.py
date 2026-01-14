@@ -2,9 +2,6 @@ import re
 import json
 from typing import Dict, List
 from pathlib import Path
-from slime.rollout.rm_hub.f1 import f1_score
-from slime.rollout.rm_hub.deepscaler import get_deepscaler_rule_based_reward
-from slime.rollout.rm_hub.math_dapo_utils import compute_score
 
 from src.reward.math_verify_reward import grade_answer
 
@@ -133,6 +130,7 @@ def extract_metrics_from_file(eval_output_file: Path) -> Dict[str, Dict[str, flo
             item = json.loads(line)
             cleaned_item = {k: v for k, v in item.items() if k not in ["prompt", "response"]}
             f.write(json.dumps(cleaned_item, ensure_ascii=False) + "\n")
+    
     # ------------------ write the failed items to the file ------------------ 
     with open(eval_output_file.with_suffix(f".failed{eval_output_file.suffix}"), "w", encoding="utf-8") as f:
         for item in failed_items:

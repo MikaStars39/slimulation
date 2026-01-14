@@ -11,8 +11,9 @@ DATASETS = {
     "math500": ("HuggingFaceH4/MATH-500", "test"),
     "minerva": ("math-ai/minervamath", "test"),
     "hmmt2025": ("FlagEval/HMMT_2025", "train"),
-    "gpqa_diamond": ("hendrydong/gpqa_diamond", "test"),
-    "imo-answerbench": ("Hwilner/imo-answerbench", "train"),
+    "gpqa_diamond": ("fingertap/GPQA-Diamond", "test"),
+    "imo_answerbench": ("Hwilner/imo-answerbench", "train"),
+    "beyond_aime": ("ByteDance-Seed/BeyondAIME", "test"),
 }
 
 def load_dataset_from_hf(dataset_name: str, cache_dir: str = None):
@@ -22,6 +23,8 @@ def load_dataset_from_hf(dataset_name: str, cache_dir: str = None):
         if cache_dir is not None:
             cache_dataset_name = hf_name.split("/")[-1]
             cache_path = Path(cache_dir) / cache_dataset_name
+            print(f"Cache path: {cache_path}")
+            print(f"Cache path exists: {cache_path.exists()}")
             if cache_path.exists():
                 try:
                     return load_dataset(str(cache_path), split=split)
