@@ -25,7 +25,6 @@ def if_judge(instance):
             prompt_level_pass_flag = False
     
     return {
-        **instance,
         'instruction_count': len(instructions),
         'instruction_pass_cnt': instruction_pass_cnt,
         'pass': prompt_level_pass_flag
@@ -33,7 +32,6 @@ def if_judge(instance):
 
 
 def calculate_scores(results):
-    """计算prompt level和instruct level的分数"""
     total_prompts = len(results)
     prompt_level_passed = sum(1 for r in results if r['pass'])
     
