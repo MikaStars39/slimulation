@@ -299,6 +299,5 @@ if __name__ == "__main__":
                 sampling_params=sampling_params,
                 resume=True
             )
-
     # Run the event loop
     asyncio.run(main())

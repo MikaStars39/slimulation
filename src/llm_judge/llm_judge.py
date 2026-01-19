@@ -3,7 +3,7 @@ import logging
 import os
 from pathlib import Path
 
-from src.backend.offline import run_offline_async_inference
+from src.backend.offline import BatchInferenceEngine
 from src.llm_judge.extract import prepare_extraction_data
 from src.utils import apply_template_to_jsonl, merge_two_jsonl_file
 
@@ -51,22 +51,26 @@ def llm_judge(
             user_template="blank",  # does not need to apply any other user template
         )
 
-        asyncio.run(
-            run_offline_async_inference(
-                input_file=str(eval_chat_input_file),
-                output_file=str(eval_output_file),
-                model_path=eval_model_path,
-                dp_size=dp_size,
-                tp_size=tp_size,
-                max_inflight=max_concurrency,
-                mem_fraction_static=gpu_memory_utilization,
-                sampling_params={
-                    "temperature": eval_temperature,
-                    "top_p": eval_top_p,
-                    "max_new_tokens": eval_max_new_tokens,
-                },
-            )
-        )
+        async def _run():
+            engine_args = {
+                "model_path": eval_model_path,
+                "dp_size": dp_size,
+                "tp_size": tp_size,
+                "max_inflight": max_concurrency,
+                "mem_fraction_static": gpu_memory_utilization,
+            }
+            async with BatchInferenceEngine(**engine_args) as engine:
+                await engine.run(
+                    input_file=str(eval_chat_input_file),
+                    output_file=str(eval_output_file),
+                    sampling_params={
+                        "temperature": eval_temperature,
+                        "top_p": eval_top_p,
+                        "max_new_tokens": eval_max_new_tokens,
+                    },
+                )
+
+        asyncio.run(_run())
         logging.info(f"Inference completed for {eval_chat_input_file}")
 
     merge_two_jsonl_file(

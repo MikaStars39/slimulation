@@ -35,6 +35,7 @@ def parse_args() -> argparse.Namespace:
     
     # Template
     parser.add_argument("--prompt-format", default="slime", help="Prompt template to use.")
+    parser.add_argument("--system-prompt", default=None)
     parser.add_argument("--max-concurrency", type=int, default=2000, help="Max concurrency for inference.")
 
     return parser.parse_args()

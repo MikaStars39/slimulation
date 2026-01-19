@@ -5,9 +5,18 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-from src.backend.offline import run_offline_async_inference
+from src.backend.offline import BatchInferenceEngine
 from src.llm_judge.llm_judge import llm_judge
 from src.utils import merge_two_jsonl_file, setup_logging
+
+# --------------------------------------------
+# 1. prepare data
+# 2. inference
+# 3. llm extract the answer
+# 4. judge
+# 5. llm re-judge and genrm
+# 6. summarize the metrics
+# --------------------------------------------
 
 
 @dataclass
@@ -71,6 +80,7 @@ class TaskManager:
             output_file=str(self.paths.formatted_input_file),
             model_path=str(self.args.model),
             user_template=self.args.prompt_format,
+            system_prompt=self.args.system_prompt,
         )
         return self.paths.formatted_input_file
 
@@ -83,27 +93,29 @@ class TaskManager:
         """
         resume = self.paths.infer_output_file.exists()
         if resume:
-            logging.info(
-                f"Inference results exist at {self.paths.infer_output_file}, resuming by id."
-            )
+            logging.info(f"Resuming inference from {self.paths.infer_output_file}")
 
-        asyncio.run(
-            run_offline_async_inference(
-                input_file=str(self.paths.formatted_input_file),
-                output_file=str(self.paths.infer_output_file),
-                model_path=self.args.model,
-                dp_size=self.args.dp_size,
-                tp_size=self.args.tp_size,
-                max_inflight=self.args.max_concurrency,
-                mem_fraction_static=self.args.gpu_memory_utilization,
-                resume=resume,
-                sampling_params={
-                    "temperature": self.args.temperature,
-                    "top_p": self.args.top_p,
-                    "max_new_tokens": self.args.max_new_tokens,
-                },
-            )
-        )
+        async def _run():
+            engine_args = {
+                "model_path": self.args.model,
+                "dp_size": self.args.dp_size,
+                "tp_size": self.args.tp_size,
+                "max_inflight": self.args.max_concurrency,
+                "mem_fraction_static": self.args.gpu_memory_utilization,
+            }
+            async with BatchInferenceEngine(**engine_args) as engine:
+                await engine.run(
+                    input_file=str(self.paths.formatted_input_file),
+                    output_file=str(self.paths.infer_output_file),
+                    sampling_params={
+                        "temperature": self.args.temperature,
+                        "top_p": self.args.top_p,
+                        "max_new_tokens": self.args.max_new_tokens,
+                    },
+                    resume=resume,
+                )
+
+        asyncio.run(_run())
         return self.paths.infer_output_file
 
     def llm_evaluation(self) -> Path:
@@ -111,7 +123,7 @@ class TaskManager:
         Step 3: LLM extraction (answer extraction) to produce eval_results.jsonl.
 
         Returns:
-            Path to eval_results.jsonl
+            Path to eval_results.jsonl (merged)
         """
         return llm_judge(
             eval_output_file=self.paths.eval_output_file,
@@ -133,8 +145,12 @@ class TaskManager:
         """
         Step 4: Calculate accuracy/metrics and write final.jsonl
 
+        Input:
+            eval_output_file: merged from noth eval and non-eval
+
         Returns:
-            Path to final.jsonl
+            Patn to score_output_file
+            Path to final.jsonl (only metrics)
         """
         from src.reward.reward import eval_results
 
