@@ -178,18 +178,18 @@ class BatchInferenceEngine(BaseSGLangEngine):
                 conversation: List[str] = []
                 prompt = item["prompt"]
                 total_stats = {"prompt": 0, "completion": 0, "total": 0}
+                messages: dict = {}
                 
                 for _ in range(max_turns):
                     output = await self._generate_safe(prompt, sampling_params)
-                    response = output["text"]
-                    conversation.append(response)
+                    conversation.append(output)
                     
                     # Accumulate stats
                     stats = self._extract_stats(output)
                     for k in total_stats: total_stats[k] += stats[k]
                     
                     # Check if should continue
-                    should_continue, next_prompt = turn_callback(conversation, response)
+                    should_continue, next_prompt, messages = turn_callback(conversation, messages)
                     if not should_continue or next_prompt is None:
                         break
                     prompt = next_prompt
