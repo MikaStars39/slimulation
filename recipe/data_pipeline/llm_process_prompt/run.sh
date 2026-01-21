@@ -15,6 +15,7 @@ python recipe/data_pipeline/llm_process_prompt/inference.py \
 python recipe/data_pipeline/llm_process_prompt/postprocess.py \
     --original /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_deduped.jsonl \
     --response /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_process_prompt_infer.jsonl \
-    --output /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_process_prompt_post.jsonl
+    --output /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_process_prompt_post.jsonl \
+    --failed /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_process_prompt_failed.jsonl
 
 head -n 100 /mnt/llm-train/users/explore-train/qingyu/data/stage_1/KlearReasoner-MathSub-30K/raw_process_prompt_post.jsonl > /mnt/llm-train/users/explore-train/qingyu/data/temp.jsonl

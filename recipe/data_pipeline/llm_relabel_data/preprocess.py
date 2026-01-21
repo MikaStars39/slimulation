@@ -8,7 +8,7 @@ from transformers import AutoTokenizer
 # We use <result> tags to wrap the output for precise regex/string extraction
 WASH_SYSTEM_PROMPT = """
 ### Role
-You are a professional data taxonomist. Your task is to classify the input prompt into a primary and secondary category. 
+You are a professional data taxonomist. Your task is to classify the input prompt into a primary and secondary category.
 
 ### ALLOWED CATEGORY LIST
 You MUST select the primary and secondary categories ONLY from this list. If a topic is not explicitly listed, you MUST use the "others" category of the most relevant primary domain.
@@ -18,7 +18,7 @@ You MUST select the primary and secondary categories ONLY from this list. If a t
 
 **Secondary Categories (mapped to Primary):**
 - **math**: ["arithmetic", "algebra", "geometry", "number_theory", "combinatorics", "probability_stats", "calculus", "discrete_math", "others"]
-- **science**: ["physics", "chemistry", "biology", "earth_space", "engineering", "medicine_health", "computer_science", "finance_accounting", "economics", "psychology", "others"]
+- **science**: ["physics", "chemistry", "biology", "earth_space", "engineering", "medicine_health", "computer_science", "finance_accounting", "economics", "psychology", "materials_science", "public_health", "agriculture", "environmental_science", "others"]
 - **humanities**: ["political_science_sociology", "history_archaeology", "law", "philosophy_ethics", "literature_linguistics", "arts_design", "others"]
 - **general**: ["instruction_following", "commonsense", "creative_writing", "general_factoid", "safety", "others"]
 - **logic**: ["logic"]
@@ -42,7 +42,7 @@ geometry is not a primary category.
 linear_algebra is math,algebra.
 group_theory is math,algebra.
 
-You can first think shortly, then do the catagory classification task.
+You can first think shortly, then do the category classification task.
 
 ### Input Prompt to Classify:
 """
@@ -58,7 +58,7 @@ def prepare_data(input_file, output_file, tokenizer_name):
         for line in f_in:
             if not line.strip(): continue
             data = json.loads(line)
-            
+
             # Formulating the message with the new instructions
             data['prompt'] = [
                 {"role": "user", "content": WASH_SYSTEM_PROMPT + data.get('prompt', '')}
@@ -79,6 +79,6 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True)
     parser.add_argument("--tokenizer", required=True)
     args = parser.parse_args()
-    
+
     prepare_data(args.input, args.output, args.tokenizer)
     print(f"[Pre-process] Done. Inference file ready: {args.output}")
