@@ -1,8 +1,8 @@
 from typing import Dict
 
-from open_gym.reward.if_eval.if_eval import if_judge
-from open_gym.reward.math.math_verify_reward import math_judge
-from open_gym.reward.gpqa.gpqa_verify_reward import gpqa_judge
+from slimulation.reward.if_eval.if_eval import if_judge
+from slimulation.reward.math.math_verify_reward import math_judge
+from slimulation.reward.gpqa.gpqa_verify_reward import gpqa_judge
 
 # ----------------------- IMPORTANT: judge router -----------------------
 # rule-based judge router that manage the judging process

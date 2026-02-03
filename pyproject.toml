@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "open_gym"
+name = "slimulation"
 version = "0.1.0"
 description = "MikaEval: A flexible evaluation framework for LLMs"
 readme = "README_zh.md"
@@ -45,10 +45,10 @@ Homepage = "https://github.com/qingyu/mika-eval"
 Repository = "https://github.com/qingyu/mika-eval"
 
 [project.scripts]
-mika-eval = "open_gym.cli:main"
+mika-eval = "slimulation.cli:main"
 
 [tool.setuptools]
-packages = ["open_gym", "open_gym.backend", "open_gym.reward", "open_gym.reward.math", "open_gym.reward.if_eval", "open_gym.reward.if_bench", "open_gym.tasks", "open_gym.server", "open_gym.llm_judge", "open_gym.utils"]
+packages = ["slimulation", "slimulation.backend", "slimulation.reward", "slimulation.reward.math", "slimulation.reward.if_eval", "slimulation.reward.if_bench", "slimulation.tasks", "slimulation.server", "slimulation.llm_judge", "slimulation.utils"]
 
 [tool.setuptools.package-data]
-open_gym = ["py.typed"]
+slimulation = ["py.typed"]

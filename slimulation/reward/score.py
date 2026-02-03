@@ -4,7 +4,7 @@ from typing import Dict, List
 from pathlib import Path
 
 from datasets import load_dataset
-from open_gym.reward.reward import judge_router
+from slimulation.reward.reward import judge_router
 
 def instance_judge(
     instance: Dict

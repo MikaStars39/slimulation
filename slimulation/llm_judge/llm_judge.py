@@ -3,9 +3,9 @@ import logging
 import os
 from pathlib import Path
 
-from open_gym.backend.offline import BatchInferenceEngine
-from open_gym.llm_judge.extract import prepare_extraction_data
-from open_gym.utils import apply_template_to_jsonl, merge_two_jsonl_file
+from slimulation.backend.offline import BatchInferenceEngine
+from slimulation.llm_judge.extract import prepare_extraction_data
+from slimulation.utils import apply_template_to_jsonl, merge_two_jsonl_file
 
 
 def llm_judge(

@@ -1,11 +1,12 @@
+from datasets import load_dataset
 from tqdm import tqdm
 import json
 from io import TextIOWrapper
 
-from open_gym.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
+from slimulation.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
 
 
-def load_math500(
+def load_minerva(
     dataset_name: str,
     cache_dir: str,
     k: int,

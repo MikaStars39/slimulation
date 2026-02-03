@@ -1,15 +1,15 @@
 
 
 """
-`open_gym.data.tasks` is a convenience namespace that:
+`slimulation.data.tasks` is a convenience namespace that:
 - exposes the shared dataset registry / helpers
 - imports all `load_*` dataset loaders so callers can `getattr(tasks, "load_xxx")`
 
-Important: loader modules must import shared helpers from `open_gym.tasks.base`
+Important: loader modules must import shared helpers from `slimulation.tasks.base`
 to avoid circular imports during package initialization.
 """
 
-from open_gym.tasks.base import (
+from slimulation.tasks.base import (
     DATASETS, 
     get_answer_text, 
     get_question_text, 

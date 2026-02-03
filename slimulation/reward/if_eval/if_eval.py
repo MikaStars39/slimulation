@@ -1,6 +1,6 @@
 
 import json
-from open_gym.reward.if_eval.instructions_registry import INSTRUCTION_DICT
+from slimulation.reward.if_eval.instructions_registry import INSTRUCTION_DICT
 
 def if_judge(
     response: str,

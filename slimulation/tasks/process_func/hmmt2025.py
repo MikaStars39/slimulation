@@ -1,12 +1,11 @@
-from datasets import load_dataset
 from tqdm import tqdm
 import json
 from io import TextIOWrapper
 
-from open_gym.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
+from slimulation.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
 
 
-def load_minerva(
+def load_hmmt2025(
     dataset_name: str,
     cache_dir: str,
     k: int,
@@ -32,7 +31,6 @@ def load_minerva(
                 "sample_index": sample_idx,
                 "need_llm_extract": DATASETS[dataset_name]["need_llm_extract"],
                 "label": answer,
-                
             }
             
             f_out.write(json.dumps(record, ensure_ascii=False) + "\n")

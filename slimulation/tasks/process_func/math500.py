@@ -2,15 +2,15 @@ from tqdm import tqdm
 import json
 from io import TextIOWrapper
 
-from open_gym.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
+from slimulation.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
 
-def load_aime2025(
+
+def load_math500(
     dataset_name: str,
     cache_dir: str,
     k: int,
     f_out: TextIOWrapper,
 ):
-    """Load the AIME 2024 dataset."""
     dataset = load_dataset_from_hf(dataset_name, cache_dir)
     
     for idx, row in enumerate(tqdm(dataset, desc=f"Loading {dataset_name}")):

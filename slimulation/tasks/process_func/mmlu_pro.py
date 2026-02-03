@@ -2,21 +2,28 @@ from tqdm import tqdm
 import json
 from io import TextIOWrapper
 
-from open_gym.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
+from slimulation.tasks.base import DATASETS, get_question_text, get_answer_text, load_dataset_from_hf
 
 
-def load_amc2023(
+def load_mmlu_pro(
     dataset_name: str,
     cache_dir: str,
     k: int,
     f_out: TextIOWrapper,
 ):
+    """Load the MMLU-Pro dataset."""
     dataset = load_dataset_from_hf(dataset_name, cache_dir)
     
     for idx, row in enumerate(tqdm(dataset, desc=f"Loading {dataset_name}")):
         
-        question = get_question_text(row)
-        answer = get_answer_text(row)
+        question = row["question"]
+        options = row["options"]
+
+        # build questions with lettered options:
+        lettered_options = [f"{chr(65 + i)}. {opt}" for i, opt in enumerate(options)]
+        question = f"{question}\n\nOptions:\n" + "\n".join(lettered_options)
+
+        row.pop("question_id", "question")
 
         for sample_idx in range(k):
             # Create a unique ID for each attempt
@@ -30,7 +37,7 @@ def load_amc2023(
                 "prompt": question,  # 'prompt' key matches the offline engine script
                 "sample_index": sample_idx,
                 "need_llm_extract": DATASETS[dataset_name]["need_llm_extract"],
-                "label": answer,
+                **row
                 
             }
             

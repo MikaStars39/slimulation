@@ -12,7 +12,7 @@ import logging
 import warnings
 import multiprocessing.resource_tracker
 
-from open_gym.backend import BatchInferenceEngine
+from slimulation.backend import BatchInferenceEngine
 
 # Suppress resource tracker warnings
 warnings.filterwarnings("ignore", message="resource_tracker:.*")

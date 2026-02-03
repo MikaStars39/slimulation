@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from datasets import load_dataset
 
-import open_gym.tasks as tasks
+import slimulation.tasks as tasks
 
 from .process_func import *
 

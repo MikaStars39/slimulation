@@ -12,14 +12,14 @@ import json
 import logging
 import os
 
-import open_gym.tasks as tasks
+import slimulation.tasks as tasks
 
 from pathlib import Path
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from open_gym.tasks import DATASETS
-from open_gym.utils.template import PROMPT_TEMPLATES, SYSTEM_PROMPT_TEMPLATES
+from slimulation.tasks import DATASETS
+from slimulation.utils.template import PROMPT_TEMPLATES, SYSTEM_PROMPT_TEMPLATES
 
 
 def prepare_dataset(

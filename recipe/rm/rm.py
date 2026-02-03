@@ -14,10 +14,10 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from open_gym.backend import OnlineServingEngine
-from open_gym.llm_judge import extract_answer_online
-from open_gym.reward import judge_router
-from open_gym.server import RewardRequest, save_request_log
+from slimulation.backend import OnlineServingEngine
+from slimulation.llm_judge import extract_answer_online
+from slimulation.reward import judge_router
+from slimulation.server import RewardRequest, save_request_log
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
 logger = logging.getLogger("RM")

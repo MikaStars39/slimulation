@@ -13,7 +13,7 @@ export PYTHONFAULTHANDLER=1
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
 PROJECT_DIR=/mnt/llm-train/users/explore-train/qingyu/slime
-ORIGINAL_PATH=/mnt/llm-train/users/explore-train/qingyu/ckpt/20260202_142135_langauge_rl/iter_0000015
+ORIGINAL_PATH=/mnt/llm-train/users/explore-train/qingyu/ckpt/20260202_142135_langauge_rl/iter_0000335
 
 PYTHONPATH=/root/Megatron-LM python \
     ${PROJECT_DIR}/tools/convert_torch_dist_to_hf.py \
@@ -25,7 +25,7 @@ PYTHONPATH=/root/Megatron-LM python \
 
 # MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/ckpt/20260131_052150_self_distillation/iter_0000031_hf"
 MODEL_PATH=${ORIGINAL_PATH}_hf
-MODEL_PATH=/mnt/llm-train/users/explore-train/qingyu/ckpt/sft-16k-v1/12524
+MODEL_PATH=/mnt/llm-train/users/explore-train/wangzhenfang8/output/40b/sft-postrain-exp-v8-baselong-e2_lr5e-5_minlr5e-6/50099/
 CACHE_DIR="/mnt/llm-train/users/explore-train/qingyu/.cache"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/eval_outputs/${TIMESTAMP}_ours_12524"
