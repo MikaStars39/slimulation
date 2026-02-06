@@ -18,7 +18,7 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/eval_outputs/${TIMESTAMP}_ifeval"
 
 # Step 1: Prepare data (load benchmarks and apply chat template)
-python /mnt/llm-train/users/explore-train/qingyu/MikaEval/recipe/evaluation/prepare_data.py \
+python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/evaluation/prepare_data.py \
     --dataset "ifeval@1" \
     --cache-dir "$CACHE_DIR" \
     --out-dir "$OUTPUT_DIR" \
@@ -27,7 +27,7 @@ python /mnt/llm-train/users/explore-train/qingyu/MikaEval/recipe/evaluation/prep
     # --system-prompt "You are JoyAI, a large language model trained by JD (京东). Answer as concisely as possible."
 
 # Step 2: Run batch inference
-python /mnt/llm-train/users/explore-train/qingyu/MikaEval/recipe/evaluation/inference.py \
+python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/evaluation/inference.py \
     --input "$OUTPUT_DIR/data.chat.jsonl" \
     --output "$OUTPUT_DIR/results.jsonl" \
     --model "$MODEL_PATH" \
@@ -39,7 +39,7 @@ python /mnt/llm-train/users/explore-train/qingyu/MikaEval/recipe/evaluation/infe
     --resume
 
 # Step 3: Evaluate and calculate metrics
-python /mnt/llm-train/users/explore-train/qingyu/MikaEval/recipe/evaluation/evaluate.py \
+python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/evaluation/evaluate.py \
     --input "$OUTPUT_DIR/results.jsonl" \
     --output-dir "$OUTPUT_DIR" \
     --num-proc 32

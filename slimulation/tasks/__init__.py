@@ -27,6 +27,7 @@ from .process_func.ceval import load_ceval
 from .process_func.DAPO_Math_17k_Processed import load_DAPO_Math_17k_Processed
 from .process_func.ifeval import load_ifeval
 from .process_func.ifbench import load_ifbench
+from .process_func.mmlu import load_mmlu
 from .process_func.mmlu_pro import load_mmlu_pro
 from .process_func.ceval import load_ceval
 
@@ -46,6 +47,7 @@ __all__ = [
     "load_DAPO_Math_17k_Processed",
     "load_ifeval",
     "load_ifbench",
+    "load_mmlu",
     "load_mmlu_pro",
     "load_ceval",
 ]

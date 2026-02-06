@@ -25,14 +25,14 @@ PYTHONPATH=/root/Megatron-LM python \
 
 # MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/ckpt/20260131_052150_self_distillation/iter_0000031_hf"
 MODEL_PATH=${ORIGINAL_PATH}_hf
-MODEL_PATH=/mnt/llm-train/users/explore-train/qingyu/ckpt/sft-train-exp-s2-v2-bases1v2-e2_lr1e-5_minlr1e-6/736
+MODEL_PATH=/mnt/llm-train/users/explore-train/qingyu/ckpt/sft-16k-v2
 CACHE_DIR="/mnt/llm-train/users/explore-train/qingyu/.cache"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/eval_outputs/${TIMESTAMP}_12524"
 
 # Step 1: Prepare data (load benchmarks and apply chat template)
 python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/evaluation/prepare_data.py \
-    --dataset "math500@4" \
+    --dataset "mmlu@1,mmlu_pro@8" \
     --cache-dir "$CACHE_DIR" \
     --out-dir "$OUTPUT_DIR" \
     --model "$MODEL_PATH" \

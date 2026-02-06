@@ -24,7 +24,7 @@ def judge_router(
         # }
         #
         return if_judge(response, **kwargs)
-    elif "gpqa" in source.lower():
+    elif "gpqa" in source.lower() or "mmlu" in source.lower():
         return gpqa_judge(response, label, **kwargs)
     else:
         #

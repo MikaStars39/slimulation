@@ -77,6 +77,13 @@ DATASETS = {
         "eval_type": "math",
         "process_func": "load_mmlu_pro",
     },
+    "mmlu": {
+        "hf_name": "cais/mmlu",
+        "split": "test",
+        "need_llm_extract": False,
+        "eval_type": "math",
+        "process_func": "load_mmlu",
+    },
 
     "ceval": {
         "hf_name": "ceval/ceval-exam",

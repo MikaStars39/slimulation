@@ -25,6 +25,16 @@ def load_mmlu_pro(
 
         row.pop("question_id", "question")
 
+        answer = row.get("answer", get_answer_text(row))
+        if isinstance(answer, int):
+            label = chr(65 + answer)
+        else:
+            answer_str = str(answer).strip()
+            if answer_str.isdigit():
+                label = chr(65 + int(answer_str))
+            else:
+                label = answer_str
+
         for sample_idx in range(k):
             # Create a unique ID for each attempt
             # Format: {dataset}_{original_index}_{attempt_index}
@@ -37,6 +47,7 @@ def load_mmlu_pro(
                 "prompt": question,  # 'prompt' key matches the offline engine script
                 "sample_index": sample_idx,
                 "need_llm_extract": DATASETS[dataset_name]["need_llm_extract"],
+                "label": label,
                 **row
                 
             }
