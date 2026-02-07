@@ -51,17 +51,43 @@ function inference() {
 MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/.cache/Qwen3-30B-A3B-Instruct-2507"
 function inference_qwen() {
     python $SCRIPT_DIR/recipe/arena_hard/arena_data/preprocess_qwen.py \
-        --input $OUTPUT_DIR/question_en.jsonl \
-        --output $OUTPUT_DIR/preprocess_qwen.jsonl \
+        --input $OUTPUT_DIR/prepare/question.jsonl \
+        --output $OUTPUT_DIR/prepare/preprocess_qwen.jsonl \
         --tokenizer $MODEL_PATH
 
     python $SCRIPT_DIR/recipe/arena_hard/inference.py \
-        --input "$OUTPUT_DIR/preprocess_qwen.jsonl" \
-        --output "$OUTPUT_DIR/results_qwen.jsonl" \
+        --input "$OUTPUT_DIR/prepare/preprocess_qwen.jsonl" \
+        --output "$OUTPUT_DIR/responses/results_qwen.jsonl" \
         --model "$MODEL_PATH" \
         --tp-size 1 \
         --dp-size 8 \
         --temperature 1 \
         --top-p 1 \
         --max-tokens 32768
+}
+
+MODEL_PATH_JUDGE="/mnt/llm-train/users/explore-train/qingyu/.cache/Qwen3-30B-A3B-Thinking-2507"
+function build_data() {
+    python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/arena_hard/arena_data/prepare_pairwise_judge.py \
+    --all /mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/responses/all.jsonl \
+    --qwen /mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/responses/results_qwen.jsonl \
+    --output /mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/responses/judge_input.jsonl \
+    --tokenizer /mnt/llm-train/users/explore-train/qingyu/.cache/Qwen3-30B-A3B-Thinking-2507
+
+    python $SCRIPT_DIR/recipe/arena_hard/inference.py \
+        --input "$OUTPUT_DIR/responses/judge_input.jsonl" \
+        --output "$OUTPUT_DIR/responses/judge_output.jsonl" \
+        --model "$MODEL_PATH_JUDGE" \
+        --tp-size 1 \
+        --dp-size 8 \
+        --temperature 1 \
+        --top-p 1 \
+        --max-tokens 32768
+}
+
+function extract_pairwise_scores() {
+python /mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/arena_hard/arena_data/extract_pairwise_scores.py \
+    --input "$OUTPUT_DIR/judge/all.jsonl" \
+    --output "$OUTPUT_DIR/judge/topk_pairs.jsonl" \
+    --topk 30
 }

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/arena_hard"
-MODEL_NAME="dpo-v4"  # Set your model name here
-MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/ckpt/1315"
+OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/eval_outputs/9498"
+MODEL_NAME="sft-128k-last-256-1e-4-min1e-5"  # Set your model name here
+MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/ckpt/9498"
 BASELINE_MODEL="o3-mini-2025-01-31"
 JUDGE_MODEL="gpt-4.1"
 JUDGE_DIR="$OUTPUT_DIR/judgments/$JUDGE_MODEL"
@@ -18,6 +18,10 @@ CONTROL_FEATURES=""  # e.g. "length markdown" to enable style control
 SCRIPT_DIR="/mnt/llm-train/users/explore-train/qingyu/slimulation"
 STYLE_ARGS=""
 
+mkdir -p $OUTPUT_DIR
+mkdir -p $OUTPUT_DIR/responses
+mkdir -p $OUTPUT_DIR/judgments
+
 if [ -n "$CONTROL_FEATURES" ]; then
     STYLE_ARGS="--answer-dir $OUTPUT_DIR --control-features $CONTROL_FEATURES"
 fi
@@ -26,8 +30,10 @@ echo "OPENAI_API_KEY: $OPENAI_API_KEY"
 
 function preprocess() {
     python $SCRIPT_DIR/recipe/arena_hard/preprocess.py \
-        --input $OUTPUT_DIR/question.jsonl \
+        --input /mnt/llm-train/users/explore-train/qingyu/data/arena_hard/question_en.jsonl \
         --output $OUTPUT_DIR/preprocess.jsonl \
+        --thinking True \
+        --system-prompt "You are JoyAI, a large language model trained by JD (京东). Answer as concisely as possible. Do use a <|begin_of_thought|> {} <|end_of_thought|> format and present the final solution afterwards." \
         --tokenizer $MODEL_PATH
 }
 
@@ -53,8 +59,8 @@ function postprocess() {
 
 function api_judge() {
     python $SCRIPT_DIR/recipe/arena_hard/api_judge.py \
-        --questions "$OUTPUT_DIR/question.jsonl" \
-        --model-a "$OUTPUT_DIR/${BASELINE_MODEL}.jsonl" \
+        --questions "/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/question_en.jsonl" \
+        --model-a "/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/o3-mini-2025-01-31.jsonl" \
         --model-b "$OUTPUT_DIR/${MODEL_NAME}.jsonl" \
         --output-dir "$JUDGE_DIR" \
         --output-prefix "$MODEL_NAME" \

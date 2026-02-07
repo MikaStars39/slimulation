@@ -1,10 +1,9 @@
 #!/bin/bash
 
 # ================= 配置区域 =================
-INPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data"
-# 注意：你之前改了这个路径，确保它层级正确
-OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/responses"
-MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/.cache/DeepSeek-V3.2/DeepSeek-V3.2"
+INPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/judge"
+OUTPUT_DIR="/mnt/llm-train/users/explore-train/qingyu/data/arena_hard/data/judge"
+MODEL_PATH="/mnt/llm-train/users/explore-train/qingyu/.cache/Qwen3-30B-A3B-Thinking-2507"
 INFERENCE_SCRIPT="/mnt/llm-train/users/explore-train/qingyu/slimulation/recipe/llm_judge/inference.py"
 
 # Pod 列表
@@ -42,9 +41,9 @@ for i in {0..19}; do
     
     # 格式化分片 ID
     shard_suffix=$(printf "%02d" $i)
-    input_file="${INPUT_DIR}/preprocess_10_times_part_${shard_suffix}.jsonl"
-    output_file="${OUTPUT_DIR}/response_part_${shard_suffix}.jsonl"
-    log_file="${OUTPUT_DIR}/log_part_${shard_suffix}.log"
+    input_file="${INPUT_DIR}/shard_${shard_suffix}.jsonl"
+    output_file="${OUTPUT_DIR}/response_${shard_suffix}.jsonl"
+    log_file="${OUTPUT_DIR}/log_${shard_suffix}.log"
     
     echo "启动 Pod: [$pod_name] -> Shard: $shard_suffix"
 

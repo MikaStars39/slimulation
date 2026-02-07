@@ -65,6 +65,34 @@ SCORE_PATTERNS = [
 ]
 
 
+def _iter_records_from_line(line: str):
+    stripped = line.strip()
+    if not stripped or stripped in ("[", "]"):
+        return
+    if stripped.endswith(","):
+        stripped = stripped[:-1]
+    try:
+        yield json.loads(stripped)
+        return
+    except json.JSONDecodeError:
+        pass
+
+    decoder = json.JSONDecoder()
+    idx = 0
+    length = len(stripped)
+    while idx < length:
+        while idx < length and stripped[idx].isspace():
+            idx += 1
+        if idx >= length:
+            break
+        if stripped[idx] == ",":
+            idx += 1
+            continue
+        obj, end = decoder.raw_decode(stripped, idx)
+        yield obj
+        idx = end
+
+
 # ============================================================================
 # Data Models
 # ============================================================================
@@ -449,8 +477,9 @@ def load_questions(question_file: str) -> List[Question]:
     questions = []
     with open(question_file, 'r', encoding='utf-8') as f:
         for line in f:
-            if line.strip():
-                data = json.loads(line)
+            if not line.strip():
+                continue
+            for data in _iter_records_from_line(line):
                 questions.append(Question(
                     uid=data["uid"],
                     prompt=data["prompt"],
